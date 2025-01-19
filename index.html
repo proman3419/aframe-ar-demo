@@ -17,6 +17,7 @@
                 tick: function (time, timeDelta) {
                     const position = this.el.object3D.position;
                     const kanjiMarker = document.querySelector('#kanji');
+                    const yminusMarker = document.querySelector('#yminus');
 
                     position.x += window.velocityVector.x * window.velocityFactor;
                     position.y += window.velocityVector.y * window.velocityFactor;
@@ -27,13 +28,20 @@
                         const distance = Math.sqrt(
                             Math.pow(position.x - markerPosition.x, 2) +
                             Math.pow(position.y - markerPosition.y, 2)
-                            // + Math.pow(position.z - markerPosition.z, 2)
                         );
 
                         if (distance < window.markerDistanceThreshold) {
                             window.velocityVector = { x: 0, y: 1, z: 0 };
-                        } else {
-                            window.velocityVector = { x: 0, y: 0, z: 1 };
+                        }
+                    } else if (yminusMarker.object3D.visible) {
+                        const markerPosition = yminusMarker.object3D.position;
+                        const distance = Math.sqrt(
+                            Math.pow(position.x - markerPosition.x, 2) +
+                            Math.pow(position.y - markerPosition.y, 2)
+                        );
+
+                        if (distance < window.markerDistanceThreshold) {
+                            window.velocityVector = { x: 0, y: -1, z: 0 };
                         }
                     }
 
@@ -50,7 +58,8 @@
 
                 const markers = [
                     { id: 'hiro', marker: document.querySelector('a-marker[preset="hiro"]') },
-                    { id: 'kanji', marker: document.querySelector('#kanji') }
+                    { id: 'kanji', marker: document.querySelector('#kanji') },
+                    { id: 'yminus', marker: document.querySelector('#yminus') }
                 ];
 
                 function updateVisibleMarkers() {
@@ -74,7 +83,7 @@
 
         <a-scene embedded vr-mode-ui="enabled: false;" arjs="debugUIEnabled: false;">
             <a-assets>
-                <img id="earth-sphere" src="https://stemkoski.github.io/AR.js-examples/images/earth-sphere.jpg" />
+                <img id="earth-sphere" src="https://github.com/proman3419/aframe-ar-demo/tree/master/img/earth-sphere.jpg" />
             </a-assets>
 
             <a-marker preset="hiro">
@@ -83,6 +92,8 @@
             </a-marker>
 
             <a-marker id="kanji" preset="kanji" listmarkers></a-marker>
+          
+            <a-marker id="yminus" type="pattern" url="https://raw.githubusercontent.com/proman3419/aframe-ar-demo/refs/heads/master/patterns/pattern-y_minus.patt"></a-marker>
 
             <a-entity camera></a-entity>
         </a-scene>
