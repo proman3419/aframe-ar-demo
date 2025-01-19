@@ -6,44 +6,44 @@
 
     <body style="margin: 0px; overflow: hidden;">
         <script>
-            window.velocityFactor = 0.003
+            window.velocityFactor = 0.003;
             window.velocityVector = { x: 1, y: 0, z: 0 };
-            window.markerDistanceThreshold = 0.25
+            window.markerDistanceThreshold = 0.25;
+            window.movingObjectScale = { x: 0.25, y: 0.25, z: 0.25 }
 
             AFRAME.registerComponent('mover', {
                 init: function () {
-                    this.el.object3D.scale.set(0.75, 0.75, 0.75);
+                    this.el.object3D.scale.set(window.movingObjectScale.x, window.movingObjectScale.y, window.movingObjectScale.z);
                 },
                 tick: function (time, timeDelta) {
                     const position = this.el.object3D.position;
-                    const kanjiMarker = document.querySelector('#kanji');
-                    const yminusMarker = document.querySelector('#yminus');
+                    const markers = [
+                        { id: 'yplus', marker: document.querySelector('#yplus'), velocity: { x: 0, y: 1, z: 0 } },
+                        { id: 'yminus', marker: document.querySelector('#yminus'), velocity: { x: 0, y: -1, z: 0 } },
+                        { id: 'xplus', marker: document.querySelector('#xplus'), velocity: { x: 1, y: 0, z: 0 } },
+                        { id: 'xminus', marker: document.querySelector('#xminus'), velocity: { x: -1, y: 0, z: 0 } },
+                        { id: 'zplus', marker: document.querySelector('#zplus'), velocity: { x: 0, y: 0, z: 1 } },
+                        { id: 'zminus', marker: document.querySelector('#zminus'), velocity: { x: 0, y: 0, z: -1 } }
+                    ];
 
                     position.x += window.velocityVector.x * window.velocityFactor;
                     position.y += window.velocityVector.y * window.velocityFactor;
                     position.z += window.velocityVector.z * window.velocityFactor;
 
-                    if (kanjiMarker.object3D.visible) {
-                        const markerPosition = kanjiMarker.object3D.position;
-                        const distance = Math.sqrt(
-                            Math.pow(position.x - markerPosition.x, 2) +
-                            Math.pow(position.y - markerPosition.y, 2)
-                        );
+                    markers.forEach(({ marker, velocity }) => {
+                        if (marker.object3D.visible) {
+                            const markerPosition = marker.object3D.position;
+                            const distance = Math.sqrt(
+                                Math.pow(position.x - markerPosition.x, 2) +
+                                Math.pow(position.y - markerPosition.y, 2) +
+                                Math.pow(position.z - markerPosition.z, 2)
+                            );
 
-                        if (distance < window.markerDistanceThreshold) {
-                            window.velocityVector = { x: 0, y: 1, z: 0 };
+                            if (distance < window.markerDistanceThreshold) {
+                                window.velocityVector = velocity;
+                            }
                         }
-                    } else if (yminusMarker.object3D.visible) {
-                        const markerPosition = yminusMarker.object3D.position;
-                        const distance = Math.sqrt(
-                            Math.pow(position.x - markerPosition.x, 2) +
-                            Math.pow(position.y - markerPosition.y, 2)
-                        );
-
-                        if (distance < window.markerDistanceThreshold) {
-                            window.velocityVector = { x: 0, y: -1, z: 0 };
-                        }
-                    }
+                    });
 
                     const positionDisplay = document.getElementById('entity-info');
                     positionDisplay.innerHTML = `
@@ -58,8 +58,12 @@
 
                 const markers = [
                     { id: 'hiro', marker: document.querySelector('a-marker[preset="hiro"]') },
-                    { id: 'kanji', marker: document.querySelector('#kanji') },
-                    { id: 'yminus', marker: document.querySelector('#yminus') }
+                    { id: 'yplus', marker: document.querySelector('#yplus') },
+                    { id: 'yminus', marker: document.querySelector('#yminus') },
+                    { id: 'xplus', marker: document.querySelector('#xplus') },
+                    { id: 'xminus', marker: document.querySelector('#xminus') },
+                    { id: 'zplus', marker: document.querySelector('#zplus') },
+                    { id: 'zminus', marker: document.querySelector('#zminus') }
                 ];
 
                 function updateVisibleMarkers() {
@@ -91,9 +95,12 @@
                 </a-sphere>
             </a-marker>
 
-            <a-marker id="kanji" preset="kanji" listmarkers></a-marker>
-          
-            <a-marker id="yminus" type="pattern" url="https://raw.githubusercontent.com/proman3419/aframe-ar-demo/refs/heads/master/patterns/pattern-y_minus.patt"></a-marker>
+            <a-marker id="yplus" type="pattern" url="https://raw.githubusercontent.com/proman3419/aframe-ar-demo/refs/heads/master/patterns/pattern-y_plus.patt" listmarkers></a-marker>
+            <a-marker id="yminus" type="pattern" url="https://raw.githubusercontent.com/proman3419/aframe-ar-demo/refs/heads/master/patterns/pattern-y_minus.patt" listmarkers></a-marker>
+            <a-marker id="xplus" type="pattern" url="https://raw.githubusercontent.com/proman3419/aframe-ar-demo/refs/heads/master/patterns/pattern-x_plus.patt" listmarkers></a-marker>
+            <a-marker id="xminus" type="pattern" url="https://raw.githubusercontent.com/proman3419/aframe-ar-demo/refs/heads/master/patterns/pattern-x_minus.patt" listmarkers></a-marker>
+            <a-marker id="zplus" type="pattern" url="https://raw.githubusercontent.com/proman3419/aframe-ar-demo/refs/heads/master/patterns/pattern-z_plus.patt" listmarkers></a-marker>
+            <a-marker id="zminus" type="pattern" url="https://raw.githubusercontent.com/proman3419/aframe-ar-demo/refs/heads/master/patterns/pattern-z_minus.patt" listmarkers></a-marker>
 
             <a-entity camera></a-entity>
         </a-scene>
