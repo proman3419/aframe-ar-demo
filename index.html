@@ -6,17 +6,22 @@
 
     <body style="margin: 0px; overflow: hidden;">
         <script>
-            window.velocityFactor = 0.003;
+            window.velocityFactor = 0.007;
             window.velocityVector = { x: 1, y: 0, z: 0 };
-            window.markerDistanceThreshold = 0.25;
-            window.movingObjectScale = { x: 0.25, y: 0.25, z: 0.25 }
+            window.markerDistanceThreshold = 0.5;
+            window.movingObjectScale = { x: 0.35, y: 0.35, z: 0.35 }
+            window.movingObjectOffset = { x: 0, y: 0, z: 0 }
+          
+            // https://aframe.io/docs/1.6.0/components/position.html
+            // zplus should be swapped with zminus (marker graphic)
 
             AFRAME.registerComponent('mover', {
                 init: function () {
                     this.el.object3D.scale.set(window.movingObjectScale.x, window.movingObjectScale.y, window.movingObjectScale.z);
                 },
                 tick: function (time, timeDelta) {
-                    const position = this.el.object3D.position;
+                    let position = this.el.object3D.position;
+                    let rotation = this.el.object3D.rotation;
                     const markers = [
                         { id: 'yplus', marker: document.querySelector('#yplus'), velocity: { x: 0, y: 1, z: 0 } },
                         { id: 'yminus', marker: document.querySelector('#yminus'), velocity: { x: 0, y: -1, z: 0 } },
@@ -34,9 +39,9 @@
                         if (marker.object3D.visible) {
                             const markerPosition = marker.object3D.position;
                             const distance = Math.sqrt(
-                                Math.pow(position.x - markerPosition.x, 2) +
-                                Math.pow(position.y - markerPosition.y, 2) +
-                                Math.pow(position.z - markerPosition.z, 2)
+                                Math.pow(window.movingObjectOffset.x + position.x - markerPosition.x, 2) +
+                                Math.pow(window.movingObjectOffset.y + position.y - markerPosition.y, 2) +
+                                Math.pow(window.movingObjectOffset.z + position.z - markerPosition.z, 2)
                             );
 
                             if (distance < window.markerDistanceThreshold) {
@@ -45,9 +50,11 @@
                         }
                     });
 
+                    this.el.object3D.position.set(position.x, position.y, position.z);
                     const positionDisplay = document.getElementById('entity-info');
                     positionDisplay.innerHTML = `
-                        <strong>Entity Position:</strong> x=${position.x.toFixed(3)}, y=${position.y.toFixed(3)}, z=${position.z.toFixed(3)}<br>
+                        <strong>Entity Rotation:</strong> x=${rotation.x.toFixed(3)}, y=${rotation.y.toFixed(3)}, z=${rotation.z.toFixed(3)}<br>
+                        <strong>Entity Position:</strong> x=${(window.movingObjectOffset.x + position.x).toFixed(3)}, y=${(window.movingObjectOffset.y + position.y).toFixed(3)}, z=${(window.movingObjectOffset.z + position.z).toFixed(3)}<br>
                         <strong>Velocity Vector:</strong> x=${window.velocityVector.x.toFixed(3)}, y=${window.velocityVector.y.toFixed(3)}, z=${window.velocityVector.z.toFixed(3)}
                     `;
                 }
@@ -75,6 +82,11 @@
                             const listItem = document.createElement('li');
                             listItem.textContent = `${id}: x=${position.x.toFixed(2)}, y=${position.y.toFixed(2)}, z=${position.z.toFixed(2)}`;
                             markerList.appendChild(listItem);
+                            if (id === 'hiro') {
+                                window.movingObjectOffset.x = position.x;
+                                window.movingObjectOffset.y = position.y;
+                                window.movingObjectOffset.z = position.z;
+                            }
                         }
                     });
 
@@ -91,7 +103,7 @@
             </a-assets>
 
             <a-marker preset="hiro">
-                <a-sphere id="earth" position="0 0.5 0" material="src: #earth-sphere; transparent: true; opacity: 0.95;" mover>
+                <a-sphere id="earth" position="0 0 0" material="src: #earth-sphere; transparent: true; opacity: 0.95;" mover>
                 </a-sphere>
             </a-marker>
 
@@ -105,12 +117,13 @@
             <a-entity camera></a-entity>
         </a-scene>
 
-        <div id="marker-info" style="position: absolute; top: 10px; left: 10px; background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 5px; font-family: Arial, sans-serif; font-size: 14px;">
+        <div id="marker-info" style="position: absolute; top: 70px; left: 10px; background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 5px; font-family: Arial, sans-serif; font-size: 14px;">
             <strong>Visible Markers:</strong>
             <ul id="marker-list"></ul>
         </div>
 
-        <div id="entity-info" style="position: absolute; top: 100px; left: 10px; background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 5px; font-family: Arial, sans-serif; font-size: 14px;">
+        <div id="entity-info" style="position: absolute; top: 10px; left: 10px; background: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 5px; font-family: Arial, sans-serif; font-size: 14px;">
+            <strong>Entity Rotation:</strong> x=0.000, y=0.000, z=0.000<br>
             <strong>Entity Position:</strong> x=0.000, y=0.000, z=0.000<br>
             <strong>Velocity Vector:</strong> x=0.000, y=0.000, z=0.000
         </div>

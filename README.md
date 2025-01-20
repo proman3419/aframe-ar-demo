@@ -5,7 +5,7 @@
 ./start.sh
 ```
 
-## Resources
+## Sources
 [Experiment with AR and A-Frame](https://aframe.io/blog/webxr-ar-module/)
 
 [Creating Augmented Reality with AR.js and A-Frame](https://aframe.io/blog/arjs/)
